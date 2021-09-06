@@ -32,9 +32,10 @@ public class StrongholdGen implements Runnable {
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
         this.biomeSource = generator.getBiomeSource();
         this.thread = new Thread(this);
+    }
+    public void start(){
         this.thread.start();
     }
-
     @Override
     public void run() {
         while(!generateStronghold());
