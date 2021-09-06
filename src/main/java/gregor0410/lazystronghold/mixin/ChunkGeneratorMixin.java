@@ -21,8 +21,10 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
 
     @Inject(method="method_28509",at=@At("HEAD"),cancellable = true)
     private void genStrongholds(CallbackInfo ci){
-        if(this.strongholdGen==null&&(this.config.getStronghold()!=null||this.config.getStronghold().getCount()>0)){
-            this.strongholdGen = new StrongholdGen((ChunkGenerator)(Object) this);
+        if(this.config.getStronghold()!=null) {
+            if (this.config.getStronghold().getCount()>0 && this.strongholdGen == null) {
+                this.strongholdGen = new StrongholdGen((ChunkGenerator) (Object) this);
+            }
         }
         ci.cancel();
     }
