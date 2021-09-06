@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "gregor0410.lazystronghold.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ChunkGeneratorMixin",
+    "ChunkGeneratorAccess"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

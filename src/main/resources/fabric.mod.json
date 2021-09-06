@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "lazystronghold",
+  "version": "${version}",
+  "name": "Lazystronghold",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/lazystronghold/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "gregor0410.lazystronghold.Lazystronghold"
+    ]
+  },
+  "mixins": [
+    "lazystronghold.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.6",
+    "minecraft": "1.16.1"
+  }
+}
