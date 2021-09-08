@@ -1,6 +1,7 @@
 package gregor0410.lazystronghold.mixin;
 
 import gregor0410.lazystronghold.ChunkGeneratorInterface;
+import gregor0410.lazystronghold.StrongholdGen;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.registry.RegistryKey;
@@ -20,6 +21,9 @@ public class MinecraftServerMixin {
 
     @Inject(method="Lnet/minecraft/server/MinecraftServer;prepareStartRegion(Lnet/minecraft/server/WorldGenerationProgressListener;)V",at=@At("TAIL"))
     private void prepareStartRegion(CallbackInfo ci){
-        ((ChunkGeneratorInterface)this.worlds.get(World.OVERWORLD).getChunkManager().getChunkGenerator()).getStrongholdGen().start();
+        StrongholdGen strongholdGen = ((ChunkGeneratorInterface)this.worlds.get(World.OVERWORLD).getChunkManager().getChunkGenerator()).getStrongholdGen();
+        if(strongholdGen!=null){
+            strongholdGen.start();
+        }
     }
 }
