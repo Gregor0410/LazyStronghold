@@ -11,6 +11,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.StrongholdConfig;
 import net.minecraft.world.gen.chunk.StructuresConfig;
 import net.minecraft.world.gen.feature.StructureFeature;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class StrongholdGen implements Runnable {
         this.generator = generator;
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
         this.biomeSource = generator.getBiomeSource();
-        this.thread = new Thread(this);
+        this.thread = new Thread(this,"Stronghold thread");
         this.config = this.generator.getConfig().getStronghold();
     }
     public void start(){
@@ -45,6 +46,11 @@ public class StrongholdGen implements Runnable {
     @Override
     public void run() {
         while(!generateStronghold());
+        if(((ChunkGeneratorAccess)this.generator).getField_24749().size()!=this.config.getCount()){
+            Lazystronghold.log(Level.ERROR,"Only "+((ChunkGeneratorAccess)this.generator).getField_24749().size() +" strongholds generated!");
+        }else{
+            Lazystronghold.log(Level.INFO,"Generated "+this.config.getCount() +" strongholds.");
+        }
     }
     private boolean generateStronghold(){
         if(n==0){
