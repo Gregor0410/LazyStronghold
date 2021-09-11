@@ -45,6 +45,7 @@ public class StrongholdGen implements Runnable {
     }
     @Override
     public void run() {
+        Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
         while(!generateStronghold());
         if(((ChunkGeneratorAccess)this.generator).getField_24749().size()!=this.config.getCount()){
             Lazystronghold.log(Level.ERROR,"Only "+((ChunkGeneratorAccess)this.generator).getField_24749().size() +" strongholds generated!");
