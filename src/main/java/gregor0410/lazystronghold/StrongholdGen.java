@@ -5,11 +5,9 @@ import gregor0410.lazystronghold.mixin.ChunkGeneratorAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.StrongholdConfig;
-import net.minecraft.world.gen.chunk.StructuresConfig;
 import net.minecraft.world.gen.feature.StructureFeature;
 import org.apache.logging.log4j.Level;
 
@@ -19,8 +17,7 @@ import java.util.Random;
 
 public class StrongholdGen implements Runnable {
     private final StrongholdConfig config;
-    private ChunkGenerator generator;
-    private Thread thread;
+    private final Thread thread;
     private Random random;
     private int i;
     private int j;
@@ -28,17 +25,18 @@ public class StrongholdGen implements Runnable {
     private double d;
     private int l;
     private int m;
-    private int n;
-    private BiomeSource biomeSource;
-    private long seed;
+    private int n = 0;
+    private final BiomeSource biomeSource;
+    private final long seed;
     private ArrayList<Biome> list;
+    public List<ChunkPos> strongholds;
 
     public StrongholdGen(ChunkGenerator generator){
-        this.generator = generator;
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
-        this.biomeSource = generator.getBiomeSource();
+        this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
         this.thread = new Thread(this,"Stronghold thread");
-        this.config = this.generator.getConfig().getStronghold();
+        this.config = generator.getConfig().getStronghold();
+        this.strongholds = ((ChunkGeneratorInterface)generator).getStrongholds();
     }
     public void start(){
         this.thread.start();
@@ -46,9 +44,9 @@ public class StrongholdGen implements Runnable {
     @Override
     public void run() {
         Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
-        while(!generateStronghold());
-        if(((ChunkGeneratorAccess)this.generator).getField_24749().size()!=this.config.getCount()){
-            Lazystronghold.log(Level.ERROR,"Only "+((ChunkGeneratorAccess)this.generator).getField_24749().size() +" strongholds generated!");
+        while(!this.generateStronghold());
+        if(this.strongholds.size()!=this.config.getCount()){
+            Lazystronghold.log(Level.ERROR,"Only "+this.strongholds.size() +" strongholds generated!");
         }else{
             Lazystronghold.log(Level.INFO,"Generated "+this.config.getCount() +" strongholds.");
         }
@@ -79,7 +77,7 @@ public class StrongholdGen implements Runnable {
                 o = blockPos.getX() >> 4;
                 p = blockPos.getZ() >> 4;
             }
-            ((ChunkGeneratorAccess)this.generator).getField_24749().add(new ChunkPos(o,p));
+            this.strongholds.add(new ChunkPos(o,p));
             d += Math.PI * 2 / (double)k;
             ++l;
             if (l == k) {
