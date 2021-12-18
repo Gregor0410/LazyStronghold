@@ -51,6 +51,9 @@ public class StrongholdGen implements Runnable {
             Lazystronghold.log(Level.INFO,"Generated "+this.config.getCount() +" strongholds.");
         }
     }
+    public boolean isComplete(){
+        return strongholds.size()== config.getCount();
+    }
     private boolean generateStronghold(){
         if(n==0){
             //initialise algorithm
