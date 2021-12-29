@@ -31,6 +31,7 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
         if(this.config.getStronghold()!=null) {
             if (this.config.getStronghold().getCount()>0 && this.strongholdGen == null) {
                 this.strongholdGen = new StrongholdGen((ChunkGenerator) (Object) this);
+                this.strongholdGen.start();
             }
         }
         ci.cancel();

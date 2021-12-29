@@ -27,9 +27,9 @@ public class MinecraftServerMixin {
     private void prepareStartRegion(CallbackInfo ci){
         this.worlds.get(World.OVERWORLD).getChunkManager().getChunkGenerator().method_28507(new ChunkPos(0,0));
         strongholdGen = ((ChunkGeneratorInterface)this.worlds.get(World.OVERWORLD).getChunkManager().getChunkGenerator()).getStrongholdGen();
-        if(strongholdGen!=null) {
-            strongholdGen.start();
-        }
+//        if(strongholdGen!=null) {
+//            strongholdGen.start();
+//        }
     }
     @Inject(method="Lnet/minecraft/server/MinecraftServer;prepareStartRegion(Lnet/minecraft/server/WorldGenerationProgressListener;)V",at=@At("TAIL"))
     private void waitForStrongholdGen(CallbackInfo ci){
