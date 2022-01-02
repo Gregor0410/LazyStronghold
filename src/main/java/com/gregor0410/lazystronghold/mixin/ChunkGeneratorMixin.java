@@ -11,11 +11,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -36,14 +34,11 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
         }
         ci.cancel();
     }
-    @ModifyVariable(at=@At("STORE"),ordinal = 0,method="locateStructure(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/gen/feature/StructureFeature;Lnet/minecraft/util/math/BlockPos;IZ)Lnet/minecraft/util/math/BlockPos;")
-    private Iterator<ChunkPos> getStrongholdIterator(Iterator<ChunkPos> i){
-        return this.strongholds.iterator();
+    @Redirect(method="<init>(Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/gen/chunk/StructuresConfig;J)V",at=@At(value="FIELD",target="Lnet/minecraft/world/gen/chunk/ChunkGenerator;field_24749:Ljava/util/List;",opcode = Opcodes.PUTFIELD))
+    private void modifyStrongholdList(ChunkGenerator instance, List<ChunkPos> value){
+        ((ChunkGeneratorAccess)instance).setField_24749(this.strongholds);
     }
-    @Redirect(method="method_28507(Lnet/minecraft/util/math/ChunkPos;)Z",at=@At(value="FIELD",target="Lnet/minecraft/world/gen/chunk/ChunkGenerator;field_24749:Ljava/util/List;",opcode = Opcodes.GETFIELD))
-    private List<ChunkPos> method_28507_redirect(ChunkGenerator generator){
-        return this.strongholds;
-    }
+
     @Override
     public StrongholdGen getStrongholdGen() {
         return this.strongholdGen;

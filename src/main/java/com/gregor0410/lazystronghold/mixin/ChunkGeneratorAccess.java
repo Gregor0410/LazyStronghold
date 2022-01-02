@@ -12,5 +12,5 @@ public interface ChunkGeneratorAccess {
     @Accessor
     long getField_24748();
     @Accessor
-    List<ChunkPos> getField_24749();
+    void setField_24749(List<ChunkPos> strongholds);
 }
