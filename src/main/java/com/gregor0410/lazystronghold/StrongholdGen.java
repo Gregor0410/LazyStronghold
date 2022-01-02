@@ -1,7 +1,7 @@
-package gregor0410.lazystronghold;
+package com.gregor0410.lazystronghold;
 
 import com.google.common.collect.Lists;
-import gregor0410.lazystronghold.mixin.ChunkGeneratorAccess;
+import com.gregor0410.lazystronghold.mixin.ChunkGeneratorAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
@@ -30,8 +30,10 @@ public class StrongholdGen implements Runnable {
     private final long seed;
     private ArrayList<Biome> list;
     public List<ChunkPos> strongholds;
+    public boolean started;
 
     public StrongholdGen(ChunkGenerator generator){
+        this.started=false;
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
         this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
         this.thread = new Thread(this,"Stronghold thread");
@@ -39,6 +41,7 @@ public class StrongholdGen implements Runnable {
         this.strongholds = ((ChunkGeneratorInterface)generator).getStrongholds();
     }
     public void start(){
+        this.started = true;
         this.thread.start();
     }
     @Override

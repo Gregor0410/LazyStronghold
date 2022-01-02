@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "gregor0410.lazystronghold.Lazystronghold"
+      "com.gregor0410.lazystronghold.Lazystronghold"
     ]
   },
   "mixins": [

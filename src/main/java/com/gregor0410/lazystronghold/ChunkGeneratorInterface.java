@@ -1,4 +1,4 @@
-package gregor0410.lazystronghold;
+package com.gregor0410.lazystronghold;
 
 import net.minecraft.util.math.ChunkPos;
 

@@ -1,4 +1,4 @@
-package gregor0410.lazystronghold;
+package com.gregor0410.lazystronghold;
 
 import net.fabricmc.api.ModInitializer;
 import org.apache.logging.log4j.Level;

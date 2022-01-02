@@ -1,4 +1,4 @@
-package gregor0410.lazystronghold.mixin;
+package com.gregor0410.lazystronghold.mixin;
 
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
