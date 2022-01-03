@@ -24,6 +24,7 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     private StrongholdGen strongholdGen = null;
     private final List<ChunkPos> strongholds = new CopyOnWriteArrayList<>();
     private static final double ROOT_2 = Math.sqrt(2);
+    private static final int PADDING = 5;
 
 
     @Inject(method="<init>(Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/gen/chunk/StructuresConfig;J)V",at=@At("TAIL"))
@@ -37,14 +38,23 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
 
 
     private int minSquaredDistance(){
+        if(2.75*this.config.getStronghold().getDistance()*16-128*ROOT_2<0) return 0;
         return (int) Math.pow((int)(2.75*this.config.getStronghold().getDistance()*16-128*ROOT_2)>>4,2);
     }
+    private int minSquaredDistanceWithPadding(){
+        if(2.75*this.config.getStronghold().getDistance()*16-128*ROOT_2-PADDING*16<0) return 0;
+        return (int) Math.pow(((int)(2.75*this.config.getStronghold().getDistance()*16-128*ROOT_2)>>4)-PADDING,2);
+    }
+
     @Inject(method="method_28507",at=@At("HEAD"))
     private void waitForStrongholds(ChunkPos chunkPos, CallbackInfoReturnable<Boolean> cir){
         if(this.strongholdGen!=null){
-            if(chunkPos.x*chunkPos.x+chunkPos.z*chunkPos.z>=minSquaredDistance()){
-                if(!strongholdGen.started)strongholdGen.start();
-                while(!strongholdGen.isComplete());
+            int squaredDistance = (chunkPos.x * chunkPos.x) + (chunkPos.z * chunkPos.z);
+            if(squaredDistance >=minSquaredDistanceWithPadding()) {
+                if (!strongholdGen.started) strongholdGen.start();
+                if(squaredDistance>=minSquaredDistance()){
+                    while(!strongholdGen.isComplete());
+                }
             }
         }
     }
