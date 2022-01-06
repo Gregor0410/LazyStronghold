@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrongholdGen implements Runnable {
     private final StrongholdConfig config;
@@ -31,9 +32,12 @@ public class StrongholdGen implements Runnable {
     private ArrayList<Biome> list;
     public List<ChunkPos> strongholds;
     public boolean started;
+    private final AtomicBoolean completedSignal;
 
-    public StrongholdGen(ChunkGenerator generator){
+
+    public StrongholdGen(ChunkGenerator generator,AtomicBoolean completedSignal){
         this.started=false;
+        this.completedSignal = completedSignal;
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
         this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
         this.thread = new Thread(this,"Stronghold thread");
@@ -52,6 +56,10 @@ public class StrongholdGen implements Runnable {
             Lazystronghold.log(Level.ERROR,"Only "+this.strongholds.size() +" strongholds generated!");
         }else{
             Lazystronghold.log(Level.INFO,"Generated "+this.config.getCount() +" strongholds.");
+        }
+        synchronized (completedSignal){
+            completedSignal.set(true);
+            completedSignal.notify();
         }
     }
     public boolean isComplete(){

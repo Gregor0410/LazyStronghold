@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(ChunkGenerator.class)
 public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
@@ -24,14 +25,15 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     private StrongholdGen strongholdGen = null;
     private final List<ChunkPos> strongholds = new CopyOnWriteArrayList<>();
     private static final double ROOT_2 = Math.sqrt(2);
-    private static final int PADDING = 5;
+    private static final int PADDING = 10;
+    private final AtomicBoolean strongholdsCompletedSignal = new AtomicBoolean(false);
 
 
     @Inject(method="<init>(Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/gen/chunk/StructuresConfig;J)V",at=@At("TAIL"))
     private void init(CallbackInfo ci){
         if(this.config.getStronghold()!=null){
             if(this.config.getStronghold().getCount()>0){
-                this.strongholdGen = new StrongholdGen((ChunkGenerator) (Object) this);
+                this.strongholdGen = new StrongholdGen((ChunkGenerator) (Object) this,strongholdsCompletedSignal);
             }
         }
     }
@@ -47,23 +49,31 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     }
 
     @Inject(method="method_28507",at=@At("HEAD"))
-    private void waitForStrongholds(ChunkPos chunkPos, CallbackInfoReturnable<Boolean> cir){
+    private void waitForStrongholds(ChunkPos chunkPos, CallbackInfoReturnable<Boolean> cir) throws InterruptedException {
         if(this.strongholdGen!=null){
             int squaredDistance = (chunkPos.x * chunkPos.x) + (chunkPos.z * chunkPos.z);
             if(squaredDistance >=minSquaredDistanceWithPadding()) {
                 if (!strongholdGen.started) strongholdGen.start();
                 if(squaredDistance>=minSquaredDistance()){
-                    while(!strongholdGen.isComplete());
+                    synchronized (strongholdsCompletedSignal){
+                        while(!strongholdsCompletedSignal.get()){
+                            strongholdsCompletedSignal.wait();
+                        }
+                    }
                 }
             }
         }
     }
 
     @Redirect(method="locateStructure",at=@At(value="INVOKE",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;method_28509()V"))
-    private void waitForStrongholds2(ChunkGenerator instance){
+    private void waitForStrongholds2(ChunkGenerator instance) throws InterruptedException {
         if(this.strongholdGen!=null){
             if(!strongholdGen.started)strongholdGen.start();
-            while(!strongholdGen.isComplete());
+            synchronized (strongholdsCompletedSignal){
+                while(!strongholdsCompletedSignal.get()){
+                    strongholdsCompletedSignal.wait();
+                }
+            }
         }
     }
 
