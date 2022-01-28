@@ -32,11 +32,13 @@ public class StrongholdGen implements Runnable {
     private ArrayList<Biome> list;
     public List<ChunkPos> strongholds;
     public boolean started;
-    private final AtomicBoolean completedSignal;
+    public final AtomicBoolean completedSignal;
+    private boolean shouldStop;
 
 
     public StrongholdGen(ChunkGenerator generator,AtomicBoolean completedSignal){
         this.started=false;
+        this.shouldStop = false;
         this.completedSignal = completedSignal;
         this.seed = ((ChunkGeneratorAccess)generator).getField_24748();
         this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
@@ -48,14 +50,21 @@ public class StrongholdGen implements Runnable {
         this.started = true;
         this.thread.start();
     }
+    public void stop(){
+        this.shouldStop=true;
+    }
     @Override
     public void run() {
         Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
-        while(!this.generateStronghold());
-        if(this.strongholds.size()!=this.config.getCount()){
-            Lazystronghold.log(Level.ERROR,"Only "+this.strongholds.size() +" strongholds generated!");
-        }else{
-            Lazystronghold.log(Level.INFO,"Generated "+this.config.getCount() +" strongholds.");
+        while(!this.generateStronghold()&&!this.shouldStop);
+        if(this.shouldStop){
+            Lazystronghold.log(Level.INFO,"Stronghold thread stopped early");
+        }else {
+            if (this.strongholds.size() != this.config.getCount()) {
+                Lazystronghold.log(Level.ERROR, "Only " + this.strongholds.size() + " strongholds generated!");
+            } else {
+                Lazystronghold.log(Level.INFO, "Generated " + this.config.getCount() + " strongholds.");
+            }
         }
         synchronized (completedSignal){
             completedSignal.set(true);
