@@ -16,14 +16,6 @@ public class StrongholdGen implements Runnable {
     public final StrongholdConfig config;
     private final Thread thread;
     private final ChunkGenerator generator;
-//    private Random random;
-//    private int i;
-//    private int j;
-//    private int k;
-//    private double d;
-//    private int l;
-//    private int m;
-//    private int n = 0;
     public final BiomeSource biomeSource;
     private final long seed;
     private ArrayList<Biome> list;
@@ -69,49 +61,4 @@ public class StrongholdGen implements Runnable {
             completedSignal.notify();
         }
     }
-//    public boolean isComplete(){
-//        return strongholds.size()== config.getCount();
-//    }
-//    private boolean generateStronghold(){
-//        if(n==0){
-//            //initialise algorithm
-//            this.random = new Random(seed);
-//            this.i = config.getDistance();
-//            this.j = config.getCount();
-//            this.k = config.getSpread();
-//            this.d = this.random.nextDouble() * Math.PI * 2.0;
-//            this.l = 0;
-//            this.m = 0;
-//            this.list = Lists.<Biome>newArrayList();
-//            for(Biome biome : this.biomeSource.method_28443()) {
-//                if (biome.hasStructureFeature(StructureFeature.STRONGHOLD)) {
-//                    list.add(biome);
-//                }
-//            }
-//        }
-//        if(n<j){
-//            double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
-//            int o = (int)Math.round(Math.cos(d) * e);
-//            int p = (int)Math.round(Math.sin(d) * e);
-//            BlockPos blockPos = this.biomeSource.locateBiome((o << 4) + 8, 0, (p << 4) + 8, 112, list, random);
-//            if (blockPos != null) {
-//                o = blockPos.getX() >> 4;
-//                p = blockPos.getZ() >> 4;
-//            }
-//            this.strongholds.add(new ChunkPos(o,p));
-//            d += Math.PI * 2 / (double)k;
-//            ++l;
-//            if (l == k) {
-//                ++m;
-//                l = 0;
-//                k += 2 * k / (m + 1);
-//                k = Math.min(k, j - n);
-//                d += random.nextDouble() * Math.PI * 2.0;
-//            }
-//            n++;
-//            return false;
-//        }else{
-//            return true;
-//        }
-//    }
 }
