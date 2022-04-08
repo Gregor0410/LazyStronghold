@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Lazystronghold",
   "description": "",
-  "authors": [],
+  "authors": ["Gregor0410"],
   "contact": {},
   "license": "MIT",
   "icon": "assets/lazystronghold/icon.png",
@@ -19,6 +19,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.10.0",
-    "minecraft": "1.16.1"
+    "minecraft": "1.15.x"
   }
 }

@@ -3,11 +3,13 @@ package com.gregor0410.lazystronghold.mixin;
 import com.gregor0410.lazystronghold.ChunkGeneratorInterface;
 import com.gregor0410.lazystronghold.StrongholdGen;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.SaveProperties;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldSaveHandler;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.level.LevelInfo;
+import net.minecraft.world.level.LevelProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,17 +21,16 @@ import java.util.Map;
 
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
-    @Shadow @Final private Map<RegistryKey<World>, ServerWorld> worlds;
+    @Shadow @Final private Map<DimensionType, ServerWorld> worlds;
 
     @Shadow private int ticks;
 
-    @Shadow @Final protected SaveProperties saveProperties;
     private boolean isNewWorld;
 
     @Inject(method ="shutdown",at=@At("HEAD"))
     private void stopStrongholdThreads(CallbackInfo ci){
         this.worlds.values().forEach(world->{
-            ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
+            ChunkGenerator<?> chunkGenerator = world.getChunkManager().getChunkGenerator();
             StrongholdGen strongholdGen = ((ChunkGeneratorInterface)chunkGenerator).getStrongholdGen();
             if(strongholdGen!=null){
                 strongholdGen.stop();
@@ -88,7 +89,7 @@ public class MinecraftServerMixin {
         }
     }
     @Inject(method="createWorlds",at=@At("HEAD"))
-    private void checkIfNewWorld(CallbackInfo ci){
-        this.isNewWorld = !this.saveProperties.getMainWorldProperties().isInitialized();
+    private void checkIfNewWorld(WorldSaveHandler worldSaveHandler, LevelProperties properties, LevelInfo levelInfo, WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci){
+        this.isNewWorld = !properties.isInitialized();
     }
 }

@@ -4,10 +4,12 @@
   "package": "com.gregor0410.lazystronghold.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ChunkGeneratorAccess",
     "ChunkGeneratorMixin",
     "EntityMixin",
-    "MinecraftServerMixin"
+    "MinecraftServerMixin",
+    "StrongholdFeatureAccess",
+    "StrongholdFeatureMixin",
+    "VanillaLayeredBiomeSourceMixin"
   ],
   "client": [
   ],

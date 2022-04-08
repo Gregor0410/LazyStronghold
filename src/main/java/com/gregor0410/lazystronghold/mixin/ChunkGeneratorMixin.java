@@ -2,61 +2,64 @@ package com.gregor0410.lazystronghold.mixin;
 
 import com.gregor0410.lazystronghold.ChunkGeneratorInterface;
 import com.gregor0410.lazystronghold.StrongholdGen;
+import net.minecraft.structure.StructureManager;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.source.BiomeAccess;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.chunk.StructuresConfig;
-import org.objectweb.asm.Opcodes;
+import net.minecraft.world.gen.chunk.ChunkGeneratorConfig;
+import net.minecraft.world.gen.chunk.FlatChunkGenerator;
+import net.minecraft.world.gen.chunk.OverworldChunkGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mixin(ChunkGenerator.class)
 public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
-    @Shadow @Final private StructuresConfig config;
-    @Shadow @Final private long field_24748;
     @Mutable
-    @Shadow @Final private List<ChunkPos> field_24749;
+    @Shadow @Final protected ChunkGeneratorConfig config;
+    @Shadow @Final protected long seed;
+    @Shadow @Final protected IWorld world;
     private StrongholdGen strongholdGen = null;
-    private final List<ChunkPos> strongholds = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ChunkPos> strongholds = new CopyOnWriteArrayList<ChunkPos>();
     private static final double ROOT_2 = Math.sqrt(2);
     private static final int PADDING = 10;
 
 
-    @Inject(method="<init>(Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/biome/source/BiomeSource;Lnet/minecraft/world/gen/chunk/StructuresConfig;J)V",at=@At("TAIL"))
+    @Inject(method="<init>",at=@At("TAIL"))
     private void init(CallbackInfo ci){
-        this.field_24749=this.strongholds;
-        if(this.config.getStronghold()!=null){
-            if(this.config.getStronghold().getCount()>0){
-                this.strongholdGen = new StrongholdGen((ChunkGenerator) (Object) this,this.field_24748,this.strongholds);
-            }
+        if(((Object)this instanceof OverworldChunkGenerator || (Object)this instanceof FlatChunkGenerator) && this.config.getStrongholdCount()>0){
+            this.strongholdGen = new StrongholdGen((ChunkGenerator<?>) (Object) this,this.seed,this.strongholds);
         }
     }
 
 
     private int minSquaredDistance(){
-        double d = 2.75 * this.config.getStronghold().getDistance() * 16 - 128 * ROOT_2;
+        double d = 2.75 * this.config.getStrongholdDistance() * 16 - 128 * ROOT_2;
         if(d <0) return 0;
         return (int) Math.pow((int) d >>4,2);
     }
     private int minSquaredDistanceWithPadding(){
-        double d = 2.75 * this.config.getStronghold().getDistance() * 16 - 128 * ROOT_2;
+        double d = 2.75 * this.config.getStrongholdDistance() * 16 - 128 * ROOT_2;
         if(d - PADDING * 16 <0) return 0;
         return (int) Math.pow(((int) d >>4)-PADDING,2);
     }
 
-    @Inject(method="method_28507",at=@At("HEAD"))
-    private void waitForStrongholds(ChunkPos chunkPos, CallbackInfoReturnable<Boolean> cir) throws InterruptedException {
+    @Inject(method="setStructureStarts",at=@At("HEAD"))
+    private void waitForStrongholds(BiomeAccess biomeAccess, Chunk chunk, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, CallbackInfo ci) throws InterruptedException {
         if(this.strongholdGen!=null){
+            ChunkPos chunkPos = chunk.getPos();
             int squaredDistance = (chunkPos.x * chunkPos.x) + (chunkPos.z * chunkPos.z);
             if(squaredDistance >=minSquaredDistanceWithPadding()) {
                 if (!strongholdGen.started) strongholdGen.start();
@@ -71,9 +74,9 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
         }
     }
 
-    @Redirect(method="locateStructure",at=@At(value="INVOKE",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;method_28509()V"))
-    private void waitForStrongholds2(ChunkGenerator instance) throws InterruptedException {
-        if(this.strongholdGen!=null){
+    @Inject(method="locateStructure",at=@At("HEAD"))
+    private void waitForStrongholds2(World world, String id, BlockPos center, int radius, boolean skipExistingChunks, CallbackInfoReturnable<BlockPos> cir) throws InterruptedException {
+        if(Objects.equals(id, "Stronghold") && this.strongholdGen!=null){
             if(!strongholdGen.started)strongholdGen.start();
             synchronized (strongholdGen.completedSignal){
                 while(!strongholdGen.completedSignal.get()){
@@ -84,21 +87,17 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     }
 
 
-    @Redirect(method="method_28509",at=@At(value="FIELD",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;biomeSource:Lnet/minecraft/world/biome/source/BiomeSource;",opcode = Opcodes.GETFIELD))
-    private BiomeSource getBiomeSource(ChunkGenerator instance){
-        return this.strongholdGen.biomeSource;
-    }
-    @Inject(method = "method_28509",at=@At(value="JUMP",ordinal = 6), cancellable = true)
-    private void stopGenOnLeave(CallbackInfo ci){
-        if(this.strongholdGen!=null){
-            if(this.strongholdGen.shouldStop){
-                ci.cancel();
-            }
-        }
-    }
-    @Redirect(method = "method_28507",at=@At(value = "INVOKE",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;method_28509()V"))
-    private void cancelStrongholdGen(ChunkGenerator instance){
-    }
+//    @Inject(method = "method_28509",at=@At(value="JUMP",ordinal = 6), cancellable = true)
+//    private void stopGenOnLeave(CallbackInfo ci){
+//        if(this.strongholdGen!=null){
+//            if(this.strongholdGen.shouldStop){
+//                ci.cancel();
+//            }
+//        }
+//    }
+//    @Redirect(method = "method_28507",at=@At(value = "INVOKE",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;method_28509()V"))
+//    private void cancelStrongholdGen(ChunkGenerator instance){
+//    }
 
     @Override
     public StrongholdGen getStrongholdGen() {

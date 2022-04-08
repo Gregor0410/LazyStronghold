@@ -1,11 +1,12 @@
 package com.gregor0410.lazystronghold.mixin;
 
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.feature.StrongholdFeature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ChunkGenerator.class)
-public interface ChunkGeneratorAccess {
+@Mixin(StrongholdFeature.class)
+public interface StrongholdFeatureAccess {
     @Invoker
-    void invokeMethod_28509();
+    void invokeInitialize(ChunkGenerator<?> chunkGenerator);
 }
