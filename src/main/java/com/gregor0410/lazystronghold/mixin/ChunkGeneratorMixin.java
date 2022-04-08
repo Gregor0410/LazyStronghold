@@ -7,7 +7,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorConfig;
@@ -57,7 +56,7 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     }
 
     @Inject(method="setStructureStarts",at=@At("HEAD"))
-    private void waitForStrongholds(BiomeAccess biomeAccess, Chunk chunk, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, CallbackInfo ci) throws InterruptedException {
+    private void waitForStrongholds(Chunk chunk, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, CallbackInfo ci) throws InterruptedException {
         if(this.strongholdGen!=null){
             ChunkPos chunkPos = chunk.getPos();
             int squaredDistance = (chunkPos.x * chunkPos.x) + (chunkPos.z * chunkPos.z);

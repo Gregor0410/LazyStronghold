@@ -3,8 +3,6 @@ package com.gregor0410.lazystronghold.mixin;
 import com.gregor0410.lazystronghold.ChunkGeneratorInterface;
 import com.gregor0410.lazystronghold.StrongholdGen;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.feature.StrongholdFeature;
@@ -25,7 +23,7 @@ public class StrongholdFeatureMixin {
     private ChunkGenerator<?> generator;
 
     @Inject(method="shouldStartAt",at=@At("HEAD"),cancellable = true)
-    private void shouldStartAt(BiomeAccess biomeAccess, ChunkGenerator<?> chunkGenerator, Random random, int chunkZ, int i, Biome biome, CallbackInfoReturnable<Boolean> cir){
+    private void shouldStartAt(ChunkGenerator<?> chunkGenerator, Random random, int chunkX, int chunkZ, CallbackInfoReturnable<Boolean> cir){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).getStrongholdGen();
         if(strongholdGen != null&&strongholdGen.completedSignal.get()){
             this.startPositions = strongholdGen.strongholds.toArray(this.startPositions);
@@ -63,8 +61,8 @@ public class StrongholdFeatureMixin {
         }
     }
 
-    @Inject(method="initialize",at=@At(value="INVOKE",target = "Lnet/minecraft/world/biome/source/BiomeSource;locateBiome(IIIILjava/util/List;Ljava/util/Random;)Lnet/minecraft/util/math/BlockPos;"),cancellable = true)
-    private void x(ChunkGenerator<?> chunkGenerator, CallbackInfo ci){
+    @Inject(method="initialize",at=@At(value="INVOKE",target = "Lnet/minecraft/world/biome/source/BiomeSource;locateBiome(IIILjava/util/List;Ljava/util/Random;)Lnet/minecraft/util/math/BlockPos;"),cancellable = true)
+    private void stopStrongholdGen(ChunkGenerator<?> chunkGenerator, CallbackInfo ci){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) this.generator).getStrongholdGen();
         if(strongholdGen!=null&& strongholdGen.shouldStop){
             ci.cancel();
