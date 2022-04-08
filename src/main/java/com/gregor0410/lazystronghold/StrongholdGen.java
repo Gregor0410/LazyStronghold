@@ -30,9 +30,9 @@ public class StrongholdGen implements Runnable {
         this.shouldStop = false;
         this.completedSignal = new AtomicBoolean(false);
         this.seed = seed;
-        this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
+        this.biomeSource = ((ChunkGeneratorAccess)generator).getPopulationSource().withSeed(seed); //create new biome source instance for thread safety
         this.thread = new Thread(this,"Stronghold thread");
-        this.config = generator.getConfig().getStronghold();
+        this.config = generator.getStructuresConfig().getStronghold();
         this.strongholds = strongholds;
         this.generator = generator;
     }
@@ -46,7 +46,7 @@ public class StrongholdGen implements Runnable {
     @Override
     public void run() {
         Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
-        ((ChunkGeneratorAccess)this.generator).invokeMethod_28509();
+        ((ChunkGeneratorAccess)this.generator).invokeGenerateStrongholdPositions();
         if(this.shouldStop){
             Lazystronghold.log(Level.INFO,"Stronghold thread stopped early");
         }else {
