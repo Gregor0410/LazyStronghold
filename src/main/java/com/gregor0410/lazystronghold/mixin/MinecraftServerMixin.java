@@ -50,7 +50,7 @@ public class MinecraftServerMixin {
         }
     }
 
-    @Inject(method="prepareStartRegion",at=@At("HEAD"))
+    @Inject(method="prepareStartRegion",at=@At("TAIL"))
     private void waitForStrongholdThreadIfNotNewWorld(CallbackInfo ci){
         if(!this.isNewWorld){
             this.worlds.values().forEach(world->{
