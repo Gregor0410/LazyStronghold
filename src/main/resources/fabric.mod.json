@@ -3,7 +3,7 @@
   "id": "lazystronghold",
   "version": "${version}",
   "name": "Lazystronghold",
-  "description": "",
+  "description": "Speeds up stronghold generation through lazy evaluation of strongholds combined with multithreading",
   "authors": ["Gregor0410"],
   "contact": {},
   "license": "MIT",
