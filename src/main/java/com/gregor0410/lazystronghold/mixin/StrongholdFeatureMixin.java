@@ -27,9 +27,7 @@ public class StrongholdFeatureMixin {
     @Inject(method="shouldStartAt",at=@At("HEAD"),cancellable = true)
     private void shouldStartAt(BiomeAccess biomeAccess, ChunkGenerator<?> chunkGenerator, Random random, int chunkZ, int i, Biome biome, CallbackInfoReturnable<Boolean> cir){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).getStrongholdGen();
-        if(strongholdGen != null&&strongholdGen.completedSignal.get()){
-            this.startPositions = strongholdGen.strongholds.toArray(this.startPositions);
-        }else{
+        if(strongholdGen != null&&!strongholdGen.completedSignal.get()){
             cir.setReturnValue(false);
         }
     }
@@ -64,7 +62,7 @@ public class StrongholdFeatureMixin {
     }
 
     @Inject(method="initialize",at=@At(value="INVOKE",target = "Lnet/minecraft/world/biome/source/BiomeSource;locateBiome(IIIILjava/util/List;Ljava/util/Random;)Lnet/minecraft/util/math/BlockPos;"),cancellable = true)
-    private void x(ChunkGenerator<?> chunkGenerator, CallbackInfo ci){
+    private void stopStrongholdGen(ChunkGenerator<?> chunkGenerator, CallbackInfo ci){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) this.generator).getStrongholdGen();
         if(strongholdGen!=null&& strongholdGen.shouldStop){
             ci.cancel();

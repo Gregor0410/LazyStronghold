@@ -46,7 +46,9 @@ public class StrongholdGen implements Runnable {
     @Override
     public void run() {
         Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
+        ((StrongholdFeatureAccess)StructureFeature.STRONGHOLD).invokeInvalidateState();
         ((StrongholdFeatureAccess)StructureFeature.STRONGHOLD).invokeInitialize(this.generator);
+        ((StrongholdFeatureAccess)StructureFeature.STRONGHOLD).setStartPositions(this.strongholds.toArray(new ChunkPos[count]));
         if(this.shouldStop){
             Lazystronghold.log(Level.INFO,"Stronghold thread stopped early");
         }else {
