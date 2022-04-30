@@ -25,9 +25,7 @@ public class StrongholdFeatureMixin {
     @Inject(method="shouldStartAt",at=@At("HEAD"),cancellable = true)
     private void shouldStartAt(ChunkGenerator<?> chunkGenerator, Random random, int chunkX, int chunkZ, CallbackInfoReturnable<Boolean> cir){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).getStrongholdGen();
-        if(strongholdGen != null&&strongholdGen.completedSignal.get()){
-            this.startPositions = strongholdGen.strongholds.toArray(this.startPositions);
-        }else{
+        if(strongholdGen != null&&!strongholdGen.completedSignal.get()){
             cir.setReturnValue(false);
         }
     }

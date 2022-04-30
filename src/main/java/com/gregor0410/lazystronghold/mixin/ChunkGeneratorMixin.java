@@ -86,18 +86,6 @@ public class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     }
 
 
-//    @Inject(method = "method_28509",at=@At(value="JUMP",ordinal = 6), cancellable = true)
-//    private void stopGenOnLeave(CallbackInfo ci){
-//        if(this.strongholdGen!=null){
-//            if(this.strongholdGen.shouldStop){
-//                ci.cancel();
-//            }
-//        }
-//    }
-//    @Redirect(method = "method_28507",at=@At(value = "INVOKE",target = "Lnet/minecraft/world/gen/chunk/ChunkGenerator;method_28509()V"))
-//    private void cancelStrongholdGen(ChunkGenerator instance){
-//    }
-
     @Override
     public StrongholdGen getStrongholdGen() {
         return this.strongholdGen;
