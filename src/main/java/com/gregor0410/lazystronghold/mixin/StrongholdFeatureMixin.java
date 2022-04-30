@@ -2,10 +2,14 @@ package com.gregor0410.lazystronghold.mixin;
 
 import com.gregor0410.lazystronghold.ChunkGeneratorInterface;
 import com.gregor0410.lazystronghold.StrongholdGen;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.ChunkGeneratorConfig;
 import net.minecraft.world.gen.feature.StrongholdFeature;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,10 +29,21 @@ public class StrongholdFeatureMixin {
     @Inject(method="shouldStartAt",at=@At("HEAD"),cancellable = true)
     private void shouldStartAt(ChunkGenerator<?> chunkGenerator, Random random, int chunkX, int chunkZ, CallbackInfoReturnable<Boolean> cir){
         StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).getStrongholdGen();
-        if(strongholdGen != null&&!strongholdGen.completedSignal.get()){
+        if(strongholdGen != null&&strongholdGen.completedSignal.get()){
+            this.startPositions = strongholdGen.strongholds.toArray(this.startPositions);
+        }else{
             cir.setReturnValue(false);
         }
     }
+
+    @Inject(method = "locateStructure",at=@At("HEAD"))
+    private void setStartPositions(World world, ChunkGenerator<? extends ChunkGeneratorConfig> chunkGenerator, BlockPos blockPos, int i, boolean skipExistingChunks, CallbackInfoReturnable<@Nullable BlockPos> cir){
+        StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).getStrongholdGen();
+        if(strongholdGen != null&&strongholdGen.completedSignal.get()){
+            this.startPositions = strongholdGen.strongholds.toArray(this.startPositions);
+        }
+    }
+
 
     @Redirect(method="shouldStartAt",at=@At(value="INVOKE",target="Lnet/minecraft/world/gen/feature/StrongholdFeature;initialize(Lnet/minecraft/world/gen/chunk/ChunkGenerator;)V"))
     private void cancelStrongholdGen(StrongholdFeature instance, ChunkGenerator<?> chunkGenerator){}
