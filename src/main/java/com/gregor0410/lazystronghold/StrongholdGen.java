@@ -30,7 +30,7 @@ public class StrongholdGen implements Runnable {
         this.shouldStop = false;
         this.completedSignal = new AtomicBoolean(false);
         this.seed = seed;
-        this.biomeSource = generator.getBiomeSource().withSeed(seed); //create new biome source instance for thread safety
+        this.biomeSource = ((ChunkGeneratorAccess)generator).getBiomeSource1().withSeed(seed); //create new biome source instance for thread safety
         this.thread = new Thread(this,"Stronghold thread");
         this.config = generator.getConfig().getStronghold();
         this.strongholds = strongholds;
