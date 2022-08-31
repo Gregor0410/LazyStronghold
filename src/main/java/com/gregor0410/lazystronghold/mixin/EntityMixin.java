@@ -6,7 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +20,7 @@ public abstract class EntityMixin {
     @Inject(method="setWorld",at=@At("HEAD"))
     private void startStrongholdGen(World world, CallbackInfo ci){
         //start stronghold gen on nether entry to prevent lag when throwing eyes
-        if(world.getDimensionRegistryKey()!= DimensionType.OVERWORLD_REGISTRY_KEY&&world instanceof ServerWorld) {
+        if(world.getDimension().isNether() &&world instanceof ServerWorld) {
             MinecraftServer server = this.getServer();
             if(server!=null) {
                 for (ServerWorld serverWorld : server.getWorlds()) {
