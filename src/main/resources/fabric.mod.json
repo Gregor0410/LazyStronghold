@@ -19,6 +19,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.10.0",
-    "minecraft": "1.16.x"
+    "minecraft": ">=1.15 <=1.16-alpha.20.13.inf"
   }
 }
