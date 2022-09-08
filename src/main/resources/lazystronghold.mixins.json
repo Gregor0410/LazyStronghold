@@ -8,6 +8,7 @@
     "EntityMixin",
     "FixedBiomeSourceMixin",
     "MinecraftServerMixin",
+    "MultiNoiseBiomeSourceMixin",
     "StrongholdFeatureAccess",
     "StrongholdFeatureMixin",
     "VanillaLayeredBiomeSourceMixin"
