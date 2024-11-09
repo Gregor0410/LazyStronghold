@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface ChunkGeneratorAccess {
     @Invoker
     void callGenerateStrongholdPositions();
+
     @Accessor("biomeSource")
     BiomeSource getBiomeSource1();
 }

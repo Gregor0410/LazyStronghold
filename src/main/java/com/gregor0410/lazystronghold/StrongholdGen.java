@@ -24,39 +24,41 @@ public class StrongholdGen implements Runnable {
     public final AtomicBoolean completedSignal;
     public boolean shouldStop;
 
-
-    public StrongholdGen(ChunkGenerator generator, long seed,List<ChunkPos> strongholds){
-        this.started=false;
+    public StrongholdGen(ChunkGenerator generator, long seed, List<ChunkPos> strongholds) {
+        this.started = false;
         this.shouldStop = false;
         this.completedSignal = new AtomicBoolean(false);
         this.seed = seed;
-        this.biomeSource = ((ChunkGeneratorAccess)generator).getBiomeSource1().withSeed(seed); //create new biome source instance for thread safety
-        this.thread = new Thread(this,"Stronghold thread");
+        this.biomeSource = ((ChunkGeneratorAccess) generator).getBiomeSource1().withSeed(seed); //create new biome source instance for thread safety
+        this.thread = new Thread(this, "Stronghold thread");
         this.config = generator.getConfig().getStronghold();
         this.strongholds = strongholds;
         this.generator = generator;
     }
-    public void start(){
+
+    public void start() {
         this.started = true;
         this.thread.start();
     }
-    public void stop(){
-        this.shouldStop=true;
+
+    public void stop() {
+        this.shouldStop = true;
     }
+
     @Override
     public void run() {
-        Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
-        ((ChunkGeneratorAccess)this.generator).callGenerateStrongholdPositions();
-        if(this.shouldStop){
-            Lazystronghold.log(Level.INFO,"Stronghold thread stopped early");
-        }else {
+        Lazystronghold.log(Level.INFO, "Started stronghold gen thread");
+        ((ChunkGeneratorAccess) this.generator).callGenerateStrongholdPositions();
+        if (this.shouldStop) {
+            Lazystronghold.log(Level.INFO, "Stronghold thread stopped early");
+        } else {
             if (this.strongholds.size() != this.config.getCount()) {
                 Lazystronghold.log(Level.ERROR, "Only " + this.strongholds.size() + " strongholds generated!");
             } else {
                 Lazystronghold.log(Level.INFO, "Generated " + this.config.getCount() + " strongholds.");
             }
         }
-        synchronized (completedSignal){
+        synchronized (completedSignal) {
             completedSignal.set(true);
             completedSignal.notify();
         }
