@@ -46,7 +46,7 @@ public class StrongholdGen implements Runnable {
     @Override
     public void run() {
         Lazystronghold.log(Level.INFO,"Started stronghold gen thread");
-        ((ChunkGeneratorAccess)this.generator).invokeMethod_28509();
+        ((ChunkGeneratorAccess)this.generator).callGenerateStrongholdPositions();
         if(this.shouldStop){
             Lazystronghold.log(Level.INFO,"Stronghold thread stopped early");
         }else {
