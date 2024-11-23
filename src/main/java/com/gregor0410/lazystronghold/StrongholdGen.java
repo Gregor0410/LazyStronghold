@@ -59,5 +59,6 @@ public class StrongholdGen implements Runnable {
             completedSignal.set(true);
             completedSignal.notify();
         }
+        this.biomeSource = null;
     }
 }
