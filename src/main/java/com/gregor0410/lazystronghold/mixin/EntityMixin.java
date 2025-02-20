@@ -16,16 +16,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public abstract @Nullable MinecraftServer getServer();
+    @Shadow
+    public abstract @Nullable MinecraftServer getServer();
 
-    @Inject(method="setWorld",at=@At("HEAD"))
-    private void startStrongholdGen(World world, CallbackInfo ci){
+    @Inject(method = "setWorld", at = @At("HEAD"))
+    private void startStrongholdGen(World world, CallbackInfo ci) {
         //start stronghold gen on nether entry to prevent lag when throwing eyes
-        if(world.getDimensionRegistryKey()!= DimensionType.OVERWORLD_REGISTRY_KEY&&world instanceof ServerWorld) {
+        if (world.getDimensionRegistryKey() != DimensionType.OVERWORLD_REGISTRY_KEY && world instanceof ServerWorld) {
             MinecraftServer server = this.getServer();
-            if(server!=null) {
+            if (server != null) {
                 for (ServerWorld serverWorld : server.getWorlds()) {
-                    StrongholdGen strongholdGen = ((ChunkGeneratorInterface) serverWorld.getChunkManager().getChunkGenerator()).getStrongholdGen();
+                    StrongholdGen strongholdGen = ((ChunkGeneratorInterface) serverWorld.getChunkManager().getChunkGenerator()).lazyStronghold$getStrongholdGen();
                     if (strongholdGen != null) {
                         if (!strongholdGen.started) {
                             strongholdGen.start();
