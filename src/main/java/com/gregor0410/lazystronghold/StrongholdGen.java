@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StrongholdGen implements Runnable {
     private final Thread thread;
     private final ChunkGenerator<?> generator;
-    public final BiomeSource biomeSource;
+    public BiomeSource biomeSource;
     public CopyOnWriteArrayList<ChunkPos> strongholds;
     public boolean started;
     public final AtomicBoolean completedSignal;
@@ -24,7 +24,6 @@ public class StrongholdGen implements Runnable {
         this.started = false;
         this.shouldStop = false;
         this.completedSignal = new AtomicBoolean(false);
-        this.biomeSource = ((IBiomeSource) generator.getBiomeSource()).lazyStronghold$copy(); //create new biome source instance for thread safety
         this.thread = new Thread(this, "Stronghold thread");
         this.count = generator.getConfig().getStrongholdCount();
         this.strongholds = strongholds;
@@ -33,6 +32,7 @@ public class StrongholdGen implements Runnable {
 
     public void start() {
         this.started = true;
+        this.biomeSource = ((IBiomeSource) this.generator.getBiomeSource()).lazyStronghold$copy(); //create new biome source instance for thread safety
         this.thread.start();
     }
 
@@ -58,5 +58,6 @@ public class StrongholdGen implements Runnable {
             completedSignal.set(true);
             completedSignal.notifyAll();
         }
+        this.biomeSource = null;
     }
 }
