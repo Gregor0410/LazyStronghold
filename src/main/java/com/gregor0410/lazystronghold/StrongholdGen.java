@@ -1,32 +1,26 @@
 package com.gregor0410.lazystronghold;
 
 import com.gregor0410.lazystronghold.mixin.StrongholdFeatureAccess;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.feature.StructureFeature;
 import org.apache.logging.log4j.Level;
 
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrongholdGen implements Runnable {
     private final Thread thread;
     private final ChunkGenerator<?> generator;
     public BiomeSource biomeSource;
-    public CopyOnWriteArrayList<ChunkPos> strongholds;
     public boolean started;
     public final AtomicBoolean completedSignal;
     public boolean shouldStop;
-    public int count;
 
-    public StrongholdGen(ChunkGenerator<?> generator, CopyOnWriteArrayList<ChunkPos> strongholds) {
+    public StrongholdGen(ChunkGenerator<?> generator) {
         this.started = false;
         this.shouldStop = false;
         this.completedSignal = new AtomicBoolean(false);
         this.thread = new Thread(this, "Stronghold thread");
-        this.count = generator.getConfig().getStrongholdCount();
-        this.strongholds = strongholds;
         this.generator = generator;
     }
 
@@ -48,11 +42,7 @@ public class StrongholdGen implements Runnable {
         if (this.shouldStop) {
             Lazystronghold.log(Level.INFO, "Stronghold thread stopped early");
         } else {
-            if (this.strongholds.size() != this.count) {
-                Lazystronghold.log(Level.ERROR, "Only " + this.strongholds.size() + " strongholds generated!");
-            } else {
-                Lazystronghold.log(Level.INFO, "Generated " + this.count + " strongholds.");
-            }
+            Lazystronghold.log(Level.INFO, "Generated strongholds.");
         }
         synchronized (completedSignal) {
             completedSignal.set(true);

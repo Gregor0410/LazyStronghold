@@ -19,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mixin(ChunkGenerator.class)
 public abstract class ChunkGeneratorMixin implements ChunkGeneratorInterface {
@@ -30,8 +29,6 @@ public abstract class ChunkGeneratorMixin implements ChunkGeneratorInterface {
 
     @Unique
     private StrongholdGen strongholdGen = null;
-    @Unique
-    private final CopyOnWriteArrayList<ChunkPos> strongholds = new CopyOnWriteArrayList<>();
 
     @Mutable
     @Shadow
@@ -41,7 +38,7 @@ public abstract class ChunkGeneratorMixin implements ChunkGeneratorInterface {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(CallbackInfo ci) {
         if (((Object) this instanceof OverworldChunkGenerator || (Object) this instanceof FlatChunkGenerator) && this.config.getStrongholdCount() > 0) {
-            this.strongholdGen = new StrongholdGen((ChunkGenerator<?>) (Object) this, this.strongholds);
+            this.strongholdGen = new StrongholdGen((ChunkGenerator<?>) (Object) this);
         }
     }
 
