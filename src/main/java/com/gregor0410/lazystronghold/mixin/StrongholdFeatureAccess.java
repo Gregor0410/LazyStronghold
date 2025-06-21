@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface StrongholdFeatureAccess {
     @Invoker
     void invokeInitialize(ChunkGenerator<?> chunkGenerator);
+
     @Invoker
     void invokeInvalidateState();
 }

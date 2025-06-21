@@ -13,6 +13,7 @@ import net.minecraft.world.level.LevelProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,28 +21,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Map;
 
 @Mixin(MinecraftServer.class)
-public class MinecraftServerMixin {
-    @Shadow @Final private Map<DimensionType, ServerWorld> worlds;
+public abstract class MinecraftServerMixin {
+    @Shadow
+    @Final
+    private Map<DimensionType, ServerWorld> worlds;
+    @Shadow
+    private int ticks;
 
-    @Shadow private int ticks;
-
+    @Unique
     private boolean isNewWorld;
 
-    @Inject(method ="shutdown",at=@At("HEAD"))
-    private void stopStrongholdThreads(CallbackInfo ci){
-        this.worlds.values().forEach(world->{
+    @Inject(method = "shutdown", at = @At("HEAD"))
+    private void stopStrongholdThreads(CallbackInfo ci) {
+        this.worlds.values().forEach(world -> {
             ChunkGenerator<?> chunkGenerator = world.getChunkManager().getChunkGenerator();
-            StrongholdGen strongholdGen = ((ChunkGeneratorInterface)chunkGenerator).getStrongholdGen();
-            if(strongholdGen!=null){
+            StrongholdGen strongholdGen = ((ChunkGeneratorInterface) chunkGenerator).lazyStronghold$getStrongholdGen();
+            if (strongholdGen != null) {
                 strongholdGen.stop();
             }
         });
     }
-    @Inject(method="prepareStartRegion",at=@At("HEAD"))
-    private void startStrongholdThreadIfNotNewWorld(CallbackInfo ci){
-        if(!this.isNewWorld){
-            this.worlds.values().forEach(world->{
-                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).getStrongholdGen();
+
+    @Inject(method = "prepareStartRegion", at = @At("HEAD"))
+    private void startStrongholdThreadIfNotNewWorld(CallbackInfo ci) {
+        if (!this.isNewWorld) {
+            this.worlds.values().forEach(world -> {
+                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).lazyStronghold$getStrongholdGen();
                 if (strongholdGen != null) {
                     if (!strongholdGen.started) {
                         strongholdGen.start();
@@ -51,11 +56,11 @@ public class MinecraftServerMixin {
         }
     }
 
-    @Inject(method="prepareStartRegion",at=@At("TAIL"))
-    private void waitForStrongholdThreadIfNotNewWorld(CallbackInfo ci){
-        if(!this.isNewWorld){
-            this.worlds.values().forEach(world->{
-                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).getStrongholdGen();
+    @Inject(method = "prepareStartRegion", at = @At("TAIL"))
+    private void waitForStrongholdThreadIfNotNewWorld(CallbackInfo ci) {
+        if (!this.isNewWorld) {
+            this.worlds.values().forEach(world -> {
+                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).lazyStronghold$getStrongholdGen();
                 if (strongholdGen != null) {
                     if (!strongholdGen.started) {
                         strongholdGen.start();
@@ -74,12 +79,12 @@ public class MinecraftServerMixin {
         }
     }
 
-    @Inject(method="tick",at=@At("HEAD"))
-    private void startStrongholdThread(CallbackInfo ci){
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void startStrongholdThread(CallbackInfo ci) {
         //start the thread after 20 ticks so instances paused on world load by reset macros don't have thread started until the player unpauses
-        if(this.ticks==20){
-            this.worlds.values().forEach(world->{
-                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).getStrongholdGen();
+        if (this.ticks == 20) {
+            this.worlds.values().forEach(world -> {
+                StrongholdGen strongholdGen = ((ChunkGeneratorInterface) world.getChunkManager().getChunkGenerator()).lazyStronghold$getStrongholdGen();
                 if (strongholdGen != null) {
                     if (!strongholdGen.started) {
                         strongholdGen.start();
@@ -88,8 +93,9 @@ public class MinecraftServerMixin {
             });
         }
     }
-    @Inject(method="createWorlds",at=@At("HEAD"))
-    private void checkIfNewWorld(WorldSaveHandler worldSaveHandler, LevelProperties properties, LevelInfo levelInfo, WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci){
+
+    @Inject(method = "createWorlds", at = @At("HEAD"))
+    private void checkIfNewWorld(WorldSaveHandler worldSaveHandler, LevelProperties properties, LevelInfo levelInfo, WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci) {
         this.isNewWorld = !properties.isInitialized();
     }
 }
