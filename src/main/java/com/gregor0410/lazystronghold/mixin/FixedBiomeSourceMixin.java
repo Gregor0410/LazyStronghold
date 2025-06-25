@@ -5,21 +5,23 @@ import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.biome.source.FixedBiomeSourceConfig;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FixedBiomeSource.class)
-public class FixedBiomeSourceMixin implements IBiomeSource {
-
+public abstract class FixedBiomeSourceMixin implements IBiomeSource {
+    @Unique
     private FixedBiomeSourceConfig config;
 
-    @Inject(method="<init>",at=@At("TAIL"))
-    private void init(FixedBiomeSourceConfig config, CallbackInfo ci){
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void init(FixedBiomeSourceConfig config, CallbackInfo ci) {
         this.config = config;
     }
+
     @Override
-    public BiomeSource copy() {
-        return new FixedBiomeSource(this.config) ;
+    public BiomeSource lazyStronghold$copy() {
+        return new FixedBiomeSource(this.config);
     }
 }
